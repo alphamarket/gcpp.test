@@ -32,43 +32,29 @@ namespace cppgc_test {
         };
     public:
         void run(size_t, void**) {
-            int* y;
-            double* z;
             {
+            	#define e(x) cout<<x<<endl;
                 derived* obj = new derived;
+                e("<derived>*obj created in heap : "<<obj);
                 derived robj;
+                e("<derived>robj created in stack: "<<&obj);
 //                gc_ptr<derived> p0(&robj);    // will give memory corruption error on its disposal
 //                gc_ptr<derived> p0 = robj;    // an static_assertion will stop it to work too
+                e("<derived>*obj assigned to <g<derived>>p2");
                 gc_ptr<derived> p2 = obj;
+                e("<g<base1>>p1 created");
                 gc_ptr<base1> p1;
+                e("p1 = p2");
                 p1 = p2;
+                e("<g<base1>>x0 = p1");
                 gc_ptr<base1> x0 = p1;
+                e("<g<int>>x created");
                 gc_ptr<int> x = gc_new int(666);
+                e("<g<double>>d created");
                 gc_ptr<double> d = gc_new double(.666);
+                e("<g<double>>int1 created");
                 gc_ptr<int> int1 = gc_new int(10);
-                return;
-                #define _start(x) reinterpret_cast<uintptr_t>(x)
-                #define _end(x) _start(x) + (typeid(x).__is_pointer_p() ? sizeof(*x) : sizeof(x))
-                assert(_start(obj) <= _start(p1.get()));
-                assert(_end(obj) >= _end(p1.get()));
-                assert(_start(obj) <= _start(p2.get()));
-                assert(_end(obj) >= _end(p2.get()));
-
-
-                cout<<obj<<" "<<sizeof(decltype(obj))<<endl;
-                cout<<p1<<" "<<sizeof(*p1.get())<<endl;
-                cout<<p2<<" "<<sizeof(*p1.get())<<endl;
-                cout<<(p1.get())<<" "
-                    <<(p2.get())<<" "
-                    <<endl;
-                cout<<p1.use_count()<<" "<<p2.use_count()<<endl;
-//                p1.reset();
-    //            p2.reset();
-                cout<<p1.use_count()<<" "<<p2.use_count()<<endl;
-                y = x.get();
-                z = d.get();
             }
-            cout<<*y<<" "<<*z<<endl;
         }
     };
 }
