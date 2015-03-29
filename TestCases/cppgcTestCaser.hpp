@@ -37,9 +37,14 @@ namespace cppgc_test {
                 derived* obj = new derived;
                 e("<derived>*obj created in heap : "<<obj);
                 derived robj;
-                e("<derived>robj created in stack: "<<&obj);
-//                gc_ptr<derived> p0(&robj);    // will give memory corruption error on its disposal
-//                gc_ptr<derived> p0 = robj;    // an static_assertion will stop it to work too
+                e("<derived>robj created in stack: "<<(derived*)&obj);
+                e("<g<derived>>p0 = <ref<derived>>&robj");
+                gc_ptr<derived> p0 = ref2ptr<derived>(&robj);       // will be consideres ad manage object,
+                e("<g<base1>>p01 = <ref<base1>>&robj");
+                gc_ptr<base1> p01  = ref2ptr<base1>(&robj);
+                e("<g<base2>>p02 = <ref<base2>>&robj");
+                gc_ptr<base2> p02  = ref2ptr<base2>(&robj);
+//                gc_ptr<derived> p0_e = robj;                      // an static_assertion will stop it to work too
                 e("<derived>*obj assigned to <g<derived>>p2");
                 gc_ptr<derived> p2 = obj;
                 e("<g<base1>>p1 created");
@@ -54,6 +59,8 @@ namespace cppgc_test {
                 gc_ptr<double> d = gc_new double(.666);
                 e("<g<double>>int1 created");
                 gc_ptr<int> int1 = gc_new int(10);
+                e("<g<double>>x = <g<int>>d");
+                d = x;
             }
         }
     };
