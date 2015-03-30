@@ -1,7 +1,7 @@
 #ifndef CPPGC_TESTCASE_HPP
 #define CPPGC_TESTCASE_HPP
 
-#undef GCPP_DEBUG
+#undef GCPP_DEBUGX
 #include "../../gcpp.hpp"
 #include "../hpp/testCase.hpp"
 #include "gcppStub.hpp"
@@ -32,7 +32,7 @@ namespace cppgc_test {
         void run(size_t, void**) {
             cout<<endl;
             BESURE(this->test_basic());
-            BESURE(this->test_inherit());
+            BESURE(this->test_value());
         }
     protected:
         template<typename T>
@@ -61,14 +61,22 @@ namespace cppgc_test {
                 p<int> k = y;
                 // same senario, but still the use count should be 2
                 uu(x, y), uu(x, k), u(k, 2);
+                // try to change the value throw operator*()
+                NOT_EQUAL(*x, 666), *x = 666, IS_EQUAL(*x, 666);
             }
             Z(1);
             // dispose x
             x.reset();
             exit_test;
         }
-        bool test_inherit() {
+        bool test_value() {
             enter_test;
+            auto a = 1.1;
+            p<int> _int = a;
+            _(*_int, 1), IS(*_int, int);
+            p<double> _double = _int;
+            _(*_double, 1);
+            IS(*_double, double);
             exit_test;
         }
     };
