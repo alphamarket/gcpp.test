@@ -52,8 +52,6 @@ namespace cppgc_test {
                 gc_ptr<base2> p1;
                 e("p1 = p2");
                 p1 = p2;
-                e("<g<void>>x0 = p1.static_cast");
-                gc_ptr<void> x0 = p1.get();
                 e("<g<int>>x created");
                 gc_ptr<int> x = gcnew int(666);
                 e("<g<double>>d created");
@@ -74,6 +72,8 @@ namespace cppgc_test {
                 cout<<"\033[96m[refpas-exit]& "<<p1.get_pure()<<"\033[m"<<endl;
                 suv1 = p2;
                 suv2 = suv1;
+                e("init on fly test");
+                (gc_ptr<std::pair<int, int>>)gcnew std::pair<int, int>();
             }
             assert(gc_map.size() == 1);
             assert(suv1.use_count() == suv2.use_count());
@@ -82,7 +82,7 @@ namespace cppgc_test {
             suv2.reset();
             assert((suv1.use_count() || suv2.use_count()) == 0);
             assert(gc_map.size() == 0);
-#ifdef GC_DEBUG
+#ifdef GCPP_DEBUG
             cout<<endl<<endl<<gc_void_ptr_t::statistical()<<endl;
 #endif
         }
