@@ -45,7 +45,7 @@ int main(int, char**) {
         /* Promt the test-case */
         std::cout<<"[.] "<<__test_case->first<<std::flush;
         /* change the stdout to buffer std stream */
-        change_stdout(true);
+        change_stdout(false);
         {
             /* pre-run the test case */
             __test_case->second.first->pre_run();
