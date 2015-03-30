@@ -31,6 +31,8 @@ namespace cppgc_test {
     public:
         void run(size_t, void**) {
             derived* obj = NULL;
+            assert(obj == nullptr);
+            gc_ptr<derived> suv1, suv2;
             {
             	#define e(x) cout<<x<<endl;
                 obj = new derived;
@@ -64,11 +66,37 @@ namespace cppgc_test {
                 e("<int>sx created: "<<(int*)&sx);
                 e("<g<int>>sxp = <ref<int>>&sx");
                 gc_ptr<int> sxp = sx;
+                test_gc_ptr_pass(p1);
+                cout<<"\033[96m[refpas-exit]& "<<p1.get_pure()<<"\033[m"<<endl;
+                test_gc_ptr_pass_copy(p1);
+                cout<<"\033[96m[refpas-exit]<> "<<p1.get_pure()<<"\033[m"<<endl;
+                test_gc_ptr_pass(&p1);
+                cout<<"\033[96m[refpas-exit]& "<<p1.get_pure()<<"\033[m"<<endl;
+                suv1 = p2;
+                suv2 = suv1;
             }
-//            obj->value1++; // should give us a segdump :)
+            assert(gc_map.size() == 1);
+            assert(suv1.use_count() == suv2.use_count());
+            assert(suv1.use_count() == 2);
+            suv1.reset();
+            suv2.reset();
+            assert((suv1.use_count() || suv2.use_count()) == 0);
+            assert(gc_map.size() == 0);
 #ifdef GC_DEBUG
-            cout<<gc_void_ptr_t::statistical()<<endl;
+            cout<<endl<<endl<<gc_void_ptr_t::statistical()<<endl;
 #endif
+        }
+        template<typename T>
+        void test_gc_ptr_pass(const gc_ptr<T>& gp) {
+            cout<<"\033[96m[refpas-enter]& "<<gp.get_pure()<<"\033[m"<<endl;
+        }
+        template<typename T>
+        void test_gc_ptr_pass_copy(const gc_ptr<T> gp) {
+            cout<<"\033[96m[refpas-enter]<> "<<gp.get_pure()<<"\033[m"<<endl;
+        }
+        template<typename T>
+        void test_gc_ptr_pass(const gc_ptr<T>* const gp) {
+            cout<<"\033[96m[refpas-enter]* "<<gp->get_pure()<<"\033[m"<<endl;
         }
     };
 }
