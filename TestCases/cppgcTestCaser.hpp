@@ -37,11 +37,11 @@ namespace cppgc_test {
                 derived robj;
                 e("<derived>robj created in stack: "<<(derived*)&obj);
                 e("<g<derived>>p0 = <ref<derived>>&robj");
-                gc_ptr<derived> p0 = ref2ptr<derived>(&robj);       // will be consideres ad manage object,
+                gc_ptr<derived> p0 = robj;       // will be consideres ad manage object,
                 e("<g<base1>>p01 = <ref<base1>>&robj");
-                gc_ptr<base1> p01  = ref2ptr<base1>(&robj);
+                gc_ptr<base1> p01  = robj;
                 e("<g<base2>>p02 = <ref<base2>>&robj");
-                gc_ptr<base2> p02  = ref2ptr<base2>(&robj);
+                gc_ptr<base2> p02  = robj;
 //                gc_ptr<derived> p0_e = robj;                      // an static_assertion will stop it to work too
                 e("<g<derived>>p2 = <derived>*obj");
                 gc_ptr<derived> p2 = obj;
@@ -54,17 +54,17 @@ namespace cppgc_test {
                 const void* x01 = x0.get_const();
                 e("const void* x01: "<<x01);
                 e("<g<int>>x created");
-                gc_ptr<int> x = gc_new int(666);
+                gc_ptr<int> x = gcnew int(666);
                 e("<g<double>>d created");
-                gc_ptr<double> d = gc_new double(.666);
+                gc_ptr<double> d = gcnew double(.666);
                 e("<g<double>>int1 created");
-                gc_ptr<int> int1 = gc_new int(10);
+                gc_ptr<int> int1 = gcnew int(10);
                 e("<g<double>>d = <g<int>>x");
                 d = x;
                 int sx = 1;
                 e("<int>sx created: "<<(int*)&sx);
                 e("<g<int>>sxp = <ref<int>>&sx");
-                gc_ptr<int> sxp = ref2ptr<int>(&sx);
+                gc_ptr<int> sxp = sx;
             }
 #ifdef GC_DEBUG
             cout<<gc_void_ptr_t::statistical()<<endl;
