@@ -1,7 +1,7 @@
 #ifndef CPPGC_TESTCASE_HPP
 #define CPPGC_TESTCASE_HPP
 
-#undef GCPP_DEBUGX
+#undef GCPP_DEBUG
 #include "../../gcpp.hpp"
 #include "../hpp/testCase.hpp"
 #include "gcppStub.hpp"
@@ -72,9 +72,9 @@ namespace cppgc_test {
         bool test_value() {
             enter_test;
             auto a = 1.1;
-            p<int> _int = a;
+            p<int> _int = (int)a;
             _(*_int, 1), IS(*_int, int);
-            p<double> _double = _int;
+            p<double> _double = gc_cast<double>(_int);
             _(*_double, 1);
             IS(*_double, double);
             exit_test;
