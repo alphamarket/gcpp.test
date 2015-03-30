@@ -30,9 +30,10 @@ namespace cppgc_test {
         };
     public:
         void run(size_t, void**) {
+            derived* obj = NULL;
             {
             	#define e(x) cout<<x<<endl;
-                derived* obj = new derived;
+                obj = new derived;
                 e("<derived>*obj created in heap : "<<obj);
                 derived robj;
                 e("<derived>robj created in stack: "<<(derived*)&obj);
@@ -50,9 +51,7 @@ namespace cppgc_test {
                 e("p1 = p2");
                 p1 = p2;
                 e("<g<void>>x0 = p1.static_cast");
-                gc_ptr<void> x0 = p1.get_pure();
-                const void* x01 = x0.get_const();
-                e("const void* x01: "<<x01);
+                gc_ptr<void> x0 = p1.get();
                 e("<g<int>>x created");
                 gc_ptr<int> x = gcnew int(666);
                 e("<g<double>>d created");
@@ -66,6 +65,7 @@ namespace cppgc_test {
                 e("<g<int>>sxp = <ref<int>>&sx");
                 gc_ptr<int> sxp = sx;
             }
+//            obj->value1++; // should give us a segdump :)
 #ifdef GC_DEBUG
             cout<<gc_void_ptr_t::statistical()<<endl;
 #endif
