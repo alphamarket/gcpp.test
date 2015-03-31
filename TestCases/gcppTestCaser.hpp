@@ -47,27 +47,27 @@ namespace cppgc_test {
                 // assigning a stack var
                 x = 1;
                 // should not modify the map
-                Z(0), u(x, 1), IS_TRUE(x.is_on_stack());
+                Z(0), u(x, 1), IS_TRUE(x.stack_referred());
                 // create a new instance of x, test and access it's value by gc_ptr's operator*()
                 SHOULD_NOT_THROW(x = gcnew int(*x + 1));
                 // the map should be in creased by one
                 Z(1);
                 // the value assignment
-                _(*x, 2), u(x, 1), IS_FALSE(x.is_on_stack());
+                _(*x, 2), u(x, 1), IS_FALSE(x.stack_referred());
                 // make a ref. copy
                 p<int> y = &*x;
                 // since we used pointing to a same point, the use count should be 2
-                uu(x, y), u(x, 2), IS_FALSE(y.is_on_stack());
+                uu(x, y), u(x, 2), IS_FALSE(y.stack_referred());
                 // just a memory copy on stack, no re assignment happened
                 p<int> k = y;
                 // same senario, but still the use count should be 2
-                uu(x, y), uu(x, k), u(k, 2), IS_FALSE(k.is_on_stack());;
+                uu(x, y), uu(x, k), u(k, 2), IS_FALSE(k.stack_referred());;
                 // try to change the value throw operator*()
                 NOT_EQUAL(*x, 666), *x = 666, IS_EQUAL(*x, 666);
             }
             Z(1);
-            // dispose x
-            x.reset();
+            // dispose 
+			x.dispose();
             exit_test;
         }
         bool test_cast() {
@@ -76,7 +76,7 @@ namespace cppgc_test {
                 // convertion of double to int, must be done by client code
                 p<int> _int = (int)1.1;
                 // validate the values
-                _(*_int, 1), IS(*_int, int), IS_TRUE(_int.is_on_stack());
+                _(*_int, 1), IS(*_int, int), IS_TRUE(_int.stack_referred());
                 p<base1> _base1 = new base1; _base1->bval1 = 1;
                 IS(*_base1, base1), _(_base1->bval1, 1);
                 p<base2> _base2 = new base2; _base2->bval2 = 2;
