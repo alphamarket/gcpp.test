@@ -94,14 +94,15 @@ namespace cppgc_test {
                 _(_base1->bval1, _d1->bval1);
                 // make a dupl. of _d1
                 p<hderived123> _hd123 = new hderived123;
+                Z(4);
                 _hd123->bval3 = 1123;
                 _(_hd123->bval3, 1123);
                 auto x = _d12;
                 x = _d12.clone();
-                _d12 = _hd123;
-                cout<<dynamic_cast<derived12*>(_hd123.get())->bval1<<" "
-                    <<_d12.get()<<endl;
-                cout<<_d12.get_pure()<<(x.get_pure());
+                _base2 = _hd123;
+                cout<<dynamic_cast<base2*>(_hd123.get())<<" @ "
+                   <<_base2.get_pure()<<endl;
+//                cout<<_base2.get_registered_address()<<" "<<(x.get_registered_address());
                 Z(4);
                 x->bval1++;
                 typedef hderived123 FROM;
@@ -111,9 +112,9 @@ namespace cppgc_test {
                         !std::is_const<FROM>::value && \
                         std::is_class<TO>::value && \
                         std::is_base_of<TO, FROM>::value;
-                cout<<std::boolalpha<<b<<endl;
-//                _(_d12.get_pure(), x.get_pure());
-                cout<<(_d12->bval1)<<" "<<(x->bval1);
+                cout<<std::boolalpha<<" "<<b<<endl;
+                _(_base2.get_pure(), x.get_pure());
+                cout<<(_base2->bval2)<<" "<<(x->bval2);
             }
             exit_test;
         }
