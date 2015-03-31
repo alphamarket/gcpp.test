@@ -7,40 +7,8 @@
 #include <type_traits>
 #include "../hpp/testCase.hpp"
 #include "../hpp/teststrap.hpp"
-//#include "../../../gcpp/gcpp.1/gc_cast.hpp"
-
-#   define can_cast(FROM, TO)           std::is_convertible<FROM, TO>::value
-#   define can_cast_ptr(FROM, TO)       can_cast(FROM*, to*)
-#   define can_dynamic_cast(FROM, TO)   \
-                                        std::is_convertible<FROM, TO>::value && \
-                                        !std::is_same<FROM, TO>::value && \
-                                        !std::is_const<FROM>::value /*&& \
-                                        std::is_class<TO>::value && \
-                                        std::is_base_of<TO, FROM>::value*/
-#   define can_static_cast(FROM, TO)    can_cast(FROM, TO)
-
-
-struct base1 { int bval1; double* bp1; };
-struct base2 { int bval2; double* bp2; };
-struct base3 { int bval3; double* bp3; };
-
-struct derived1 : public base1 { int dval1; double* dp1; };
-struct derived2 : public base2 { int dval2; double* dp2; };
-struct derived3 : public base3 { int dval3; double* dp3; };
-
-struct derived12 : public base1, public base2 { int dval12; double* dp1; };
-struct derived23 : public base2, public base3 { int dval23; double* dp2; };
-struct derived31 : public base3, public base1 { int dval31; double* dp3; };
-
-struct hderived123 : public derived12, public base3 { int hdval123; double* hdp1; };
-struct hderived231 : public derived23, public base1 { int hdval231; double* hdp2; };
-struct hderived312 : public derived31, public base2 { int hdval312; double* hdp3; };
-
-bool fetch_cond(std::vector<bool>& cond) {
-    bool res = true;
-    for(auto it=cond.begin(); it != cond.end(); it++) res &= *it;
-    return res;
-}
+#include "gcppStub.hpp"
+#include "../../../gcpp/gcpp.1/gc_cast.hpp"
 
 namespace cppgc_test {
     class gcppCastTestCase : public CPP_TESTER::testCase {
@@ -54,9 +22,44 @@ namespace cppgc_test {
 #define nd(from, to) static_assert(!can_dynamic_cast(from, to), "didn't expecting dynamic cast, but could!")
             s(int, int);
             s(double, int);
-            nd(int, int); // not-same check
-//            nd(int, double);
-//            ns(base1, int);
+            nd(int, int);
+            nd(int, double);
+            ns(base1, int);
+            nd(base1, int);
+            s(base1, base1);
+            d(base1, base1);
+            ns(base1, base2);
+            nd(base1, base2);
+            ns(base2, base1);
+            nd(base2, base1);
+            s(derived1, base1);
+            d(derived1, base1);
+            ns(derived2, base1);
+            nd(derived2, base1);
+            ns(base1, derived1);
+            nd(base1, derived1);
+            ns(hderived123, derived1);
+            nd(hderived123, derived1);
+            s(hderived123, derived12);
+            d(hderived123, derived12);
+            ns(hderived123, derived2);
+            nd(hderived123, derived2);
+            s(hderived123, base3);
+            d(hderived123, base3);
+            s(hderived123, base1);
+            d(hderived123, base1);
+            s(hderived123, base2);
+            d(hderived123, base2);
+            s(hderived123, base3);
+            d(hderived123, base3);
+            derived1* w = new derived1;
+            w->bval1 = 1000;
+            void* x = w;
+            auto y = reinterpret_cast<intptr_t>(x);
+            auto z = reinterpret_cast<derived1*>(y);
+            cout<<z->bval1<<endl;
+            // there are not sibling dynamic cast allowed
+            // the client needs to perform those types of conversions by them selves
         }
     protected:
         template<typename T>
