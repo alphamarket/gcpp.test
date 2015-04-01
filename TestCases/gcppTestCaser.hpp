@@ -31,7 +31,7 @@ namespace cppgc_test {
         void run(size_t, void**) {
             cout<<endl;
             BESURE(this->test_basic());
-            BESURE(this->test_cast());
+//            BESURE(this->test_cast());
         }
     protected:
         template<typename T>
@@ -43,18 +43,37 @@ namespace cppgc_test {
             Z(0);
             {
                 // assigning a stack var
-                x = 1;
-                x = gcnew int(1);
-                p<int> k(x);
+                x = new int(1);
+                // should not modify the map
+                Z(1), u(x, 1), IS_FALSE(x.stack_referred());
+                // create a new instance of x, test and access it's value by gc_ptr's operator*()
+                SHOULD_NOT_THROW(x = new int(*x + 1));
+                // the map should be in creased by one
+                Z(1);
+                // the value assignment
+                _(*x, 2), u(x, 1), IS_FALSE(x.stack_referred());
+                // make a ref. copy
+                p<int> y = &*x;
+                // since we used pointing to a same point, the use count should be 2
+                uu(x, y), u(x, 2), IS_FALSE(y.stack_referred());
+                // just a memory copy on stack, no re assignment happened
+                p<int> k = y;
+                // same senario, but still the use count should be 2
+                uu(x, y), uu(x, k), u(k, 2), IS_FALSE(k.stack_referred());;
+                // try to change the value throw operator*()
+                NOT_EQUAL(*x, 666), *x = 666, IS_EQUAL(*x, 666);
             }
-            Z(0);
+            Z(1);
+            IS_EQUAL(*x, 666);
+            // dispose
+            x.dispose();
             exit_test;
         }
         bool test_cast() {
             enter_test;
             {
                 // convertion of double to int, must be done by client code
-                p<int> _int = 1.1;
+                p<int> _int = new int(1.1);
                 p<base1> _base1 = new base1;
                 p<base2> _base2 = new base2;
                 p<derived1> _d1 = new derived1;
