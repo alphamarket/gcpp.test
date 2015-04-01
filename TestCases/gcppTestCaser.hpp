@@ -13,22 +13,20 @@
 /**
  * the managed memory size
  */
-#define z           gc::gc_map::get().size()
+#define z
 #define _(a, b)     SHOULD_BE(a, b)
-#define Z(x)        SHOULD_BE(z, x)
+#define Z(x)        SHOULD_BE(gc::gc_map::get().size(), x)
 #define u(a, b)     SHOULD_BE(a.use_count(), b)
 #define uu(a, b)    SHOULD_BE(a.use_count(), b.use_count())
 #define ptoi(p)                      reinterpret_cast<std::intptr_t>(p)
 /**
  * constraint on test: in every test function's entry/exit the gc_map.size() must be equal to zero
  */
-#define enter_test  cout<<"  [.]"<<__func__<<"()"; IS_ZERO(z)
-#define exit_test   cout<<"\r  [\u221A]"<<endl; IS_ZERO(z); return true
+#define enter_test  cout<<"  [.]"<<__func__<<"()"; Z(0)
+#define exit_test   cout<<"\r  [\u221A]"<<endl; Z(0); return true
 namespace cppgc_test {
     using namespace gc;
     class gcppTestCase : public CPP_TESTER::testCase {
-        class x {
-        };
     public:
         void run(size_t, void**) {
             cout<<endl;
@@ -88,7 +86,7 @@ namespace cppgc_test {
                 Z(4);
                 _base1 = _d1;
                 // last pointer dies, increments the _d1's ref count
-                Z(3), _(gc_map::get().at(_d1.get_pure()), 2);
+                Z(3), _(gc_map::get().at(_d1.get_registered_id()), 2);
                 _(_base1.get_pure(), _d1.get_pure());
                 _base1->bval1++;
                 _(_base1->bval1, _d1->bval1);
@@ -100,20 +98,11 @@ namespace cppgc_test {
                 auto x = _d12;
                 x = _d12.clone();
                 _base2 = _hd123;
-                cout<<dynamic_cast<base2*>(_hd123.get())<<" @ "
-                   <<_base2.get_pure()<<endl;
-//                cout<<_base2.get_registered_address()<<" "<<(x.get_registered_address());
+                cout<<_hd123.get_pure()<<" @ "
+                   <<dynamic_cast<base2*>(_hd123.get())<<endl;
                 Z(4);
                 x->bval1++;
-                typedef hderived123 FROM;
-                typedef derived12 TO;
-                bool b= can_cast(FROM, TO) && \
-                        !std::is_same<FROM, TO>::value && \
-                        !std::is_const<FROM>::value && \
-                        std::is_class<TO>::value && \
-                        std::is_base_of<TO, FROM>::value;
-                cout<<std::boolalpha<<" "<<b<<endl;
-                _(_base2.get_pure(), x.get_pure());
+                _(_base2.get_pure(), _hd123.get_pure());
                 cout<<(_base2->bval2)<<" "<<(x->bval2);
             }
             exit_test;

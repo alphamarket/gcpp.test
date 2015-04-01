@@ -55,9 +55,9 @@ namespace cppgc_test {
             derived1* w = new derived1;
             w->bval1 = 1000;
             void* x = w;
-            auto y = reinterpret_cast<intptr_t>(x);
-            auto z = reinterpret_cast<derived1*>(y);
-            cout<<z->bval1<<endl;
+            __unused auto y = reinterpret_cast<intptr_t>(x);
+//            auto z = reinterpret_cast<derived1*>(y);
+//            cout<<z->bval1<<endl;
             // there are not sibling dynamic cast allowed
             // the client needs to perform those types of conversions by them selves
         }
