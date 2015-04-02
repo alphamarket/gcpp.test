@@ -32,6 +32,7 @@ namespace cppgc_test {
             cout<<endl;
             BESURE(this->test_basic());
             BESURE(this->test_cast());
+            BESURE(this->test_array());
         }
     protected:
         template<typename T>
@@ -104,9 +105,32 @@ namespace cppgc_test {
             Z(1);
             p<void> xp = surviver;
             surviver.dispose();
-            xp.dispose();
-            p<void> i = new int(1);
-            i.dispose();
+            {
+                xp.dispose();
+                p<void> i = new int(1);
+                _(*(int*)i.get(), 1);
+                i.dispose();
+                _((int*)(i.get()), nullptr);
+            }
+            exit_test;
+        }
+        bool test_array() {
+            enter_test;
+            p<int> s = new int(0);
+            {
+                gc_array_ptr<int> x = {new int(-1), s.get(), new int(1)},
+                y = gc_array_ptr<int>(10);
+                u(s, 2);
+                Z(13);
+                u(y.at(1), 1);
+                p<int> k = y[1];
+                Z(13);
+                u(k, 2);
+                uu(k, y.at(1));
+            }
+            Z(1);
+            u(s, 1);
+            s.dispose();
             exit_test;
         }
     };
