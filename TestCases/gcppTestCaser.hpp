@@ -71,33 +71,42 @@ namespace cppgc_test {
         }
         bool test_cast() {
             enter_test;
-            cout<<endl;
-#define m(_int) cout<<string(#_int)<<": 0x"<<_int.get_id()<<": "<<gc_map::get().at(_int.get_id())<<" #"<<gc_map::get().size()<<endl;
+            p<derived12> surviver;
             {
-                // convertion of double to int, must be done by client code
-                p<int> _int = new int(1.1);
-                m(_int);
-                p<base1> _base1 = new base1;
-                m(_base1);
-                p<base2> _base2 = new base2;
-                m(_base2);
-                p<derived1> _d1 = new derived1;
-                m(_d1);
-                p<derived12> _d12 = new derived12;
-                m(_d12);
-                m(_base1);
+                p<base1> _base1 = new base1; _base1->bval1 = 1;
+                IS(*_base1, base1), _(_base1->bval1, 1);
+                p<base2> _base2 = new base2; _base2->bval2 = 2;
+                IS(*_base2, base2), _(_base2->bval2, 2);
+                p<derived1> _d1 = new derived1; _d1->bval1 = 11, _d1->dval1 = 1;
+                _(_d1->bval1, 11), _(_d1->dval1, 1);
+                p<derived12> _d12 = new derived12; _d12->bval1 = 121; _d12->bval2 = 122;
+                _(_d12->bval1, 121), _(_d12->bval2, 122);
+                Z(4);
                 _base1 = _d1;
-                m(_base1);
+                // last pointer dies, increments the _d1's ref count
+                Z(3), _(gc_map::get().at(_d1.get_id()), 2);
+                _(_base1.get_id(), _d1.get_id());
+                _base1->bval1++;
+                _(_base1->bval1, _d1->bval1);
                 p<hderived123> _hd123 = new hderived123;
-                m(_hd123);
-//                p<base2> x = &*_base2;
-//                cout<<typeid(x).name()<<" "<<typeid(_base2).name()<<endl;
-//                m(x);
-//                _base2 = _hd123;
-                m(_base2);
-                m(_hd123);
+                Z(4);
+                _hd123->bval3 = 1123;
+                _(_hd123->bval3, 1123);
+                _base2 = _hd123;
+                Z(3);
+                _(_base2.get_id(), _hd123.get_id());
+                surviver = _hd123;
             }
-            cout<<endl<<gc_map::get().size()<<endl;
+            Z(1);
+            p<base1> b = surviver;
+            Z(1);
+            b.dispose();
+            Z(1);
+            p<void> xp = surviver;
+            surviver.dispose();
+            xp.dispose();
+            p<void> i = new int(1);
+            i.dispose();
             exit_test;
         }
     };

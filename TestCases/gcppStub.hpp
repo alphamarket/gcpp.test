@@ -3,9 +3,9 @@
 
 #include "../../gcpp.hpp"
 
-struct base1 { int bval1; double* bp1; };
-struct base2 { int bval2; double* bp2; };
-struct base3 { int bval3; double* bp3; };
+struct base1 { int bval1; double* bp1; virtual ~base1(){ } };
+struct base2 { int bval2; double* bp2; virtual ~base2(){ } };
+struct base3 { int bval3; double* bp3; virtual ~base3(){ } };
 
 struct derived1 : public base1 { int dval1; double* dp1; };
 struct derived2 : public base2 { int dval2; double* dp2; };
