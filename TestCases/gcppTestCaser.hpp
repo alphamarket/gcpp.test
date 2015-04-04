@@ -2,7 +2,7 @@
 #define CPPGC_TESTCASE_HPP
 
 #undef GCPP_DEBUG
-#include "../../gcpp.hpp"
+#include "../src/gcpp.hpp"
 #include "../hpp/testCase.hpp"
 #include "gcppStub.hpp"
 

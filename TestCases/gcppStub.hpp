@@ -1,7 +1,7 @@
 #ifndef GCPPSTUB_HPP
 #define GCPPSTUB_HPP
 
-#include "../../gcpp.hpp"
+#include "../src/gcpp.hpp"
 
 struct base1 { int bval1; double* bp1; virtual ~base1(){ } };
 struct base2 { int bval2; double* bp2; virtual ~base2(){ } };
