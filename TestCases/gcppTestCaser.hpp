@@ -1,6 +1,13 @@
 #ifndef CPPGC_TESTCASE_HPP
 #define CPPGC_TESTCASE_HPP
 
+#ifdef __unix__
+#   include <stdio.h>
+#   include <string.h>
+#   include <unistd.h>
+#   include "timer.hpp"
+#endif
+
 #undef GCPP_DEBUG
 #include "../src/gcpp.hpp"
 #include "../hpp/testCase.hpp"
@@ -33,6 +40,11 @@ namespace cppgc_test {
             BESURE(this->test_basic());
             BESURE(this->test_cast());
             BESURE(this->test_array());
+#ifdef __unix__
+            BESURE(this->test_mem());
+#else
+#   warning "memory test unit only supported in unix OS"
+#endif
         }
     protected:
         template<typename T>
@@ -133,6 +145,70 @@ namespace cppgc_test {
             s.dispose();
             exit_test;
         }
+#ifdef __unix__
+        size_t get_mem_use(){ //Note: this value is in KB!
+            FILE* file = fopen("/proc/self/status", "r");
+            int result = 0;
+            char line[128];
+            auto parseLine = [](char* line){
+                int i = strlen(line);
+                while (*line < '0' || *line > '9') line++;
+                line[i-3] = '\0';
+                i = atoi(line);
+                return i;
+            };
+            while (fgets(line, 128, file) != NULL){
+                if (strncmp(line, "VmSize:", 7) == 0) {
+                    result += parseLine(line);
+                    break;
+                }
+            }
+            fclose(file);
+            return result;
+        }
+        bool test_mem() {
+            enter_test;
+            cout<<endl;
+#   define  _echo(x) cout<<"     $ "<<x<<endl
+            {
+                typedef int test_type;
+                const size_t alloc_size = 1000000;
+                double sm = 0.0;
+                _echo("starting allocating `"<<alloc_size<<"` usign `gc_array_ptr<>`.");
+                sm = get_mem_use();
+                Timer_mil t;
+                gc_array_ptr<test_type> x(alloc_size);
+                auto time = t.elapsed();
+                auto gc_mem_use = double(get_mem_use() - sm)/1024;
+                assert(gc_map::get().size() == alloc_size);
+                _echo("allocation done! (in "<<time<<"ms.)");
+                _echo("virtual memory use: "<<gc_mem_use<<" MB usign `gc_array_ptr<>`");
+                _echo("starting deallocation `gc_array_ptr<>`.");
+                t.reset();
+                x.dispose();
+                time = t.elapsed();
+                Z(0);
+                _echo("deallocation done! (in "<<time<<"ms.)");
+                _echo("starting allocating `"<<alloc_size<<"` usign `::operator new()`.");
+                t.reset();
+                test_type** xp = new test_type*[alloc_size];
+                for(size_t i = 0;i < alloc_size; i++)
+                    xp[i] = new test_type;
+                time = t.elapsed();
+                _echo("allocation done! (in "<<time<<"ms.)");
+                _echo("virtual memory use: "<<(double(sizeof(void*) + sizeof(test_type))* alloc_size) / (1024 * 1024)<<" MB usign `::operator new()`");
+                _echo("starting deallocation `::operator delete()`.");
+                t.reset();
+                for(size_t i = 0;i < alloc_size; i++)
+                    delete xp[i];
+                delete[] xp;
+                time = t.elapsed();
+                _echo("deallocation done! (in "<<time<<"ms.)");
+            }
+#   undef   _echo
+            exit_test;
+        }
+#endif
     };
 }
 
